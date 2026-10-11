@@ -9,6 +9,7 @@ The tool only creates a temporary non-renderable overlay node. It never edits
 inspected mesh faces, materials, UVs, vertex colors, or construction history.
 
 Compatibility target: Maya 2022+ (Python 3). Maya runtime testing required.
+2026-10-11 maintenance update: isolated runtime prevents cached V2.1 UI from reopening.
 """
 
 import os
@@ -29,13 +30,13 @@ def maya_useNewAPI():
     pass
 
 
-PLUGIN_NODE = 'tiViewportOverlayShapeV21'
-PLUGIN_COMMAND = 'topologyInspectorV21UI'
+PLUGIN_NODE = 'tiViewportOverlayShapeV2B20261011'
+PLUGIN_COMMAND = 'topologyInspectorV2B20261011UI'
 # Per-plugin node IDs must be unique in Maya's running session.
-NODE_ID = om.MTypeId(0x0013B9D8)
-CLASSIFICATION = 'drawdb/geometry/tiViewportOverlayShapeV21'
-REGISTRANT_ID = 'TopologyInspectorVP2RegistrantV21'
-WINDOW_NAME = 'TopologyInspectorWindowV21'
+NODE_ID = om.MTypeId(0x0013B9E1)
+CLASSIFICATION = 'drawdb/geometry/tiViewportOverlayShapeV2B20261011'
+REGISTRANT_ID = 'TopologyInspectorVP2RegistrantV2B20261011'
+WINDOW_NAME = 'TopologyInspectorWindowV2B20261011'
 
 _KEYS = ('ngon_fill', 'ngon_lines', 'tri_fill', 'tri_lines',
          'error_fill', 'error_lines', 'error_points')
@@ -360,7 +361,7 @@ class InspectorWindow(object):
         if cmds.window(WINDOW_NAME, exists=True):
             cmds.deleteUI(WINDOW_NAME)
         self.window = cmds.window(WINDOW_NAME,
-                                  title='Topology Inspector V2 | Multi-Object QA',
+                                  title='Topology Inspector V2 | Updated 2026-10-11',
                                   sizeable=True, widthHeight=(575, 590))
         main = cmds.columnLayout(adjustableColumn=True, rowSpacing=7,
                                  columnAttach=('both', 12))
@@ -458,9 +459,9 @@ class InspectorWindow(object):
     def ensure_overlay(self):
         if self.overlay_transform and cmds.objExists(self.overlay_transform):
             return
-        self.overlay_transform = cmds.createNode('transform', name='__TI_ViewportOverlay_TEMP_V21__')
+        self.overlay_transform = cmds.createNode('transform', name='__TI_ViewportOverlay_TEMP_V2B20261011__')
         self.overlay_shape = cmds.createNode(PLUGIN_NODE, parent=self.overlay_transform,
-                                              name='__TI_ViewportOverlayShape_TEMP_V21__')
+                                              name='__TI_ViewportOverlayShape_TEMP_V2B20261011__')
         cmds.setAttr(self.overlay_transform + '.hiddenInOutliner', True)
         try:
             cmds.setAttr(self.overlay_shape + '.hiddenInOutliner', True)
@@ -714,9 +715,11 @@ class TIInspectorCommand(om.MPxCommand):
 # ----------------------------- DRAG-DROP INSTALLER --------------------------
 _TI_BUTTON = 'TI_TopologyInspector_V2_Button'
 _TI_DOC_TAG = 'TopologyInspector_DragDrop_V2'
-_TI_ICON_FILE = 'TI_TopologyInspector_V2.png'
+_TI_ICON_FILE = 'TI_TopologyInspector_V2_20261011B_32.png'
+_TI_ICON_FILE_LARGE = 'TI_TopologyInspector_V2_20261011B_64.png'
 _TI_INSTALLED_FOLDER = 'TopologyInspector'
-_TI_ICON_BASE64 = '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'
+_TI_ICON_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAIuElEQVR42q2Xe3BV1RXGf3vvc8595xICangkIvJMhUGEKS1iRmqtbQWpI3ZanalWpbTWUnGsaCtgx4raQZ0OUoWptk5tmyp1HLUKWkVGxVEs6gAiURMghNwk9517c3PP3rt/3BDCI2inPTP7n7Mf69t7re9bawmAlSutXL1amMf+8daZkaqqS0q9xXpjDRgr+H98UlgpJIFgsC2bK2y+7rLZe621QghhnSuamtTqxUJveGrb8lS6+463t79enU6nEByxbf9re0pU9mp7dL+1llhVnAmTpuY3Pr1trRBiZVNTkxIAjz69bVlXouOBjQ+vpSPRqYVQQxo2xiCEQPQbMcYMzIl+2Pm+PrCWsOeipERbCwisNVRXx9UNP7mZ2toxv1my+II7xMbn3qhPHurY/fBD9wUOtneKSCQmrTVD3i4UCqJ9TV+5jBCCYDCAQKCkoOxrcsbw44ZJDA8GeODDPZR6S8SDgQEQxWLBBj1pfnrzCnFGXf25TsgJX9q8b284mUrrTU9ukMNiUcAO3PB4J/zwxtu48Pwvc9WVl5HvKXDTravJpjNktCEWDrFh5jS+jwFjuLhxDit2fcxrLfuJuy6uUoTCYZFOdrL3o11ybF39FY7Wfl06lbKO4zJ/3hzCoeAp/RsMBDjrzDrmzpmF7/uEAh77CgXmnTWOhxsm0pDsJp3OYBHMyGR5fuoE1o+p5d6du0jle6gJh1DKJZVM4vt6rGO1sUpJUSqVuHjRD3BdRTaX555Vt3Lh+XNo2X+A6268DWPBcRSfteyvBJg2ZLJ5kmWfpdO/xG/rRxM4cJCU7+N6HgA530c2f8JNI0dwceMc7vj4U57/dD9ojZQSC9YZeGZr+XD3XsCSSaXJZLIoJSn1ldnx/i6MsbiuQ7FUwnEUSkkwhnUzp7Egn6PwWQt5KXEdB6w9ygbPI9XVzVmZDE+Nr+OJ0bXc8urrGGOQgBz8vJFwiGgkTDgawXEq2KQURCPhgSEHxcZw12GBI0kfPIR23YpBexx7rMV1XYoWMnv3cXUswpTTRlAol1FCHgvAGDMw7KCDBv8fHJRdUtIcjhAKeCcaPg4EQDgU4qO+Mjs6uoi4LmVrjgXwhb9+W7lCkZdSGQKxGMbXp9xitMaNRvhXvkC+UMBRFdOnBGCtHVIHrbWElGRLewf5aAQHC2II5RYCaQy6KsaLhxOIo48yNIAjaidPcuiRuajnsasryU4LoYCHGcINxlpCrkuzdHg30UnIdQfWDgnA933KZZ9yuXzinNaUyz6+79NTKvFSKoOIRimXfTSgrT06gLKvcSIRXs7lSfYUcSsUBMA5/nCtNdFIhDvvXsuatesp+z7WWoSogIpXxdj4x7/StOk5sJZiNscriW5+PWMqNakUOOrYgBSikj9qqnnho0/xgMFC75w0e0pBR6IL3Z94PNc9mumUIplKk+jqRgCe6/Jxd5JH0zkm145CG4NEcMTRpl8PDhZ6ee9wgrDnku8tnBoAgOu6eP20tgiEFFhjQYDjebjGYPuDUQHL334PpKIiBRYsCNl/gBAYrQlLiVLqGDvOKRlg+5+wtwdTKiEcp0JBKVDh6DFPHe1XQGstylGAQPs+QsrKOsc5aZA6J5BbHEUthED3Fqma/hVO/9Zi3OpR6HySzi3Pktz+ItILDoAw1iKlojfXzdxr1xAaNpJXHrweL1KNtXpIoTrKAqGwxsf6ZRACq32s1li/j2Gz56NCEVJvvUyofgoTV95HbOosTG+hckNACEmp2MOYKdNR9ZfRN3wek756Cb25DFKqoas1HIXpKxGsrWfaur8xonEh5WSC6ITpnLPuL9ScfykH/nAPe1cupeWRVRz404M4UQiOHoct9w2IT8UzmolfX0ZHUtHaahh30S3EquP4vg+IIQAYg/QCFA82I+RwTl9wDVb7jJj/HYKjJ5Bv/qBiREnCdZOoXXQVxdYsmR1bkaEI1hiEVJR6soyf/TX8EXPpyRqMtnT2jWHat5dSLmQRUiFlhaVSHgPAIpSD7slz+NnHiZxdT/zcCxg2cx5dL2+hdKgFawxOZBhT7n2cwMjT2L3iWkqJNqRbSUJGa8LRMHWNN9F2CFwHXFdyuM0QbfgeYxvOpdybo1CSdCYt+QJIMSgGrDEVH2/fQjlV4Mwld+LE4nS9+nRF88eezZR7H8OJxdlz+xJKHa248Rqs1gjl0NeTYVLjlWTV2fQVNUJKrBUoBa3tLg0Lf0GpTzBrCqz8mUvjTEFP0aLEkSC0FTf0treQfmcrNRdMotDaTG73DrCW2kXXEZ9ej/RqmHTXY8x+5h1Gzr8cXcijfZ/ho0Yzctb1HG63eJ4cCHilJIWsplPO4Jpl3+WZ+3tZ8SOXF9d7XDTHJZG2DKqIDNKLcqhpHbldWyl81orVPiocI/HCn8nu3IpFIYREOJae5r2oUIS+YpbJi5eT6KmusMZVA4y2FgIetBy03PCNeqLDNF0HJSOqBAsvDPLkmwZHCITtVx3hepQSbRRam5GehwxUCtT8vvfJ7X53QC+sBRUM42ufURMbCI1fxP5PfAKeOKZPADBYXGF44f3JXD5GMaI6C0ay+c1ewiEpHKmc9qqquLDWIgDhuLjxQEV2+/sDGQgjgoNoJMAaiystUxb+ivZsAC8EQoE6CdGqAvBO93n8cueTzI3/jkfWvkRwTIRFi7x2p9DrPz9u/MQ1w6vjqqdYMKFwWFpjKvQW8sQyqB+B0T5VI0fjSE1NcQcyIE7dxIU0e9qqeOWfM+2/39hs71pzDmUjNlVas6deX3mo7cCq3z90n83k8kZK54tVZsZg/F6UEp/bQQoE1pQJhUNi6bLb5di68euWLG68UVzR1KT+vnix3rBp291diY7le3Z9EEinkpUNn3toJXdYxOeus9ZSFY8zeWqDPmPU2PVPPLj5542vrTKiP/MJIYTd+MwbM6Lh2IJiqVBvtRaVhvJ/b9GFwEqp8ALBNq39567+5nnbj8z9B251JofRdT8EAAAAAElFTkSuQmCC'
+_TI_ICON_LARGE_BASE64 = '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'
 
 
 def _plugin_loaded():
@@ -736,7 +739,8 @@ def _close_old_tool_windows():
             commands = cmds.pluginInfo(plugin, query=True, command=True) or []
             if not any(x in commands for x in
                        ('topologyInspectorUI', 'topologyInspectorV13UI',
-                        'topologyInspectorV14UI', 'topologyInspectorV2UI')):
+                        'topologyInspectorV14UI', 'topologyInspectorV2UI',
+                        'topologyInspectorV21UI', 'topologyInspectorV2B20261011UI')):
                 continue
             module = sys.modules.get(os.path.splitext(os.path.basename(plugin))[0])
             ui = getattr(module, '_UI', None)
@@ -746,14 +750,16 @@ def _close_old_tool_windows():
             cmds.warning('[Topology Inspector] Prior window cleanup: {}'.format(exc))
 
     for name in ('TopologyInspectorWindow', 'TopologyInspectorWindowV13',
-                 'TopologyInspectorWindowV14', 'TopologyInspectorWindowV2'):
+                 'TopologyInspectorWindowV14', 'TopologyInspectorWindowV2',
+                 'TopologyInspectorWindowV21'):
         try:
             if cmds.window(name, exists=True):
                 cmds.deleteUI(name, window=True)
         except Exception:
             pass
     for node_type in ('tiViewportOverlayShape', 'tiViewportOverlayShapeV13',
-                      'tiViewportOverlayShapeV14', 'tiViewportOverlayShapeV2'):
+                      'tiViewportOverlayShapeV14', 'tiViewportOverlayShapeV2',
+                      'tiViewportOverlayShapeV21'):
         try:
             shapes = cmds.ls(type=node_type, long=True) or []
         except Exception:
@@ -800,12 +806,12 @@ def _shelf_command(installed_file):
         'import maya.cmds as cmds\n'
         '_ti_v2_loaded = False\n'
         'for _ti_plug in (cmds.pluginInfo(query=True, listPlugins=True) or []):\n'
-        '    if "topologyInspectorV21UI" in (cmds.pluginInfo(_ti_plug, query=True, command=True) or []):\n'
+        '    if "topologyInspectorV2B20261011UI" in (cmds.pluginInfo(_ti_plug, query=True, command=True) or []):\n'
         '        _ti_v2_loaded = True\n'
         '        break\n'
         'if not _ti_v2_loaded:\n'
         '    cmds.loadPlugin({!r}, quiet=True)\n'
-        'cmds.topologyInspectorV21UI()\n'
+        'cmds.topologyInspectorV2B20261011UI()\n'
     ).format(installed_file.replace('\\', '/'))
 
 
@@ -816,21 +822,19 @@ def _install_shelf(installed_file, icon_path):
     for child in children:
         if not cmds.shelfButton(child, exists=True):
             continue
-        if child.rsplit('|', 1)[-1] in (
-                _TI_BUTTON, 'TI_TopologyInspector_Button',
-                'TI_TopologyInspector_V13_Button', 'TI_TopologyInspector_V14_Button'):
+        if child.rsplit('|', 1)[-1] == _TI_BUTTON:
             existing = child
             break
         try:
             if cmds.shelfButton(child, query=True, docTag=True) in (
-                    _TI_DOC_TAG, 'TopologyInspector_DragDrop_V21', 'TopologyInspector_DragDrop',
-                    'TopologyInspector_DragDrop_V13', 'TopologyInspector_DragDrop_V14'):
+                    _TI_DOC_TAG, 'TopologyInspector_DragDrop_V21'):
                 existing = child
                 break
         except Exception:
             pass
     opts = dict(annotation='Topology Inspector V2: color-coded multi-object check',
                 label='Topology Inspector V2', image1=icon_path.replace('\\', '/'),
+                image2=icon_path.replace('_32.png', '_64.png').replace('\\', '/'),
                 imageOverlayLabel='', sourceType='python',
                 command=_shelf_command(installed_file), docTag=_TI_DOC_TAG)
     if existing:
@@ -863,7 +867,7 @@ def ti_install_from_file(source):
     _active_shelf()
     install_dir = os.path.join(cmds.internalVar(userScriptDir=True), _TI_INSTALLED_FOLDER)
     os.makedirs(install_dir, exist_ok=True)
-    installed = os.path.join(install_dir, 'TopologyInspector_Runtime_V2.py')
+    installed = os.path.join(install_dir, 'TopologyInspector_Runtime_V2_20261011B.py')
     same_file = os.path.normcase(source) == os.path.normcase(os.path.abspath(installed))
     if not _plugin_loaded():
         if not same_file:
@@ -878,15 +882,18 @@ def ti_install_from_file(source):
     icon_path = os.path.join(icon_dir, _TI_ICON_FILE)
     with open(icon_path, 'wb') as f:
         f.write(base64.b64decode(_TI_ICON_BASE64))
+    icon_large_path = os.path.join(icon_dir, _TI_ICON_FILE_LARGE)
+    with open(icon_large_path, 'wb') as f:
+        f.write(base64.b64decode(_TI_ICON_LARGE_BASE64))
 
     shelf_name = _install_shelf(installed, icon_path)
     getattr(cmds, PLUGIN_COMMAND)()
     try:
         if cmds.window(WINDOW_NAME, exists=True):
-            cmds.window(WINDOW_NAME, edit=True, title='Topology Inspector V2 | Multi-Object QA')
+            cmds.window(WINDOW_NAME, edit=True, title='Topology Inspector V2 | Updated 2026-10-11')
     except Exception:
         pass
-    message = 'Topology Inspector V2 installed on {} shelf'.format(shelf_name)
+    message = 'Topology Inspector V2 (2026-10-11 update) installed on {} shelf'.format(shelf_name)
     print('[Topology Inspector] ' + message)
     try:
         cmds.inViewMessage(amg=message, pos='topCenter', fade=True)

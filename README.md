@@ -47,7 +47,9 @@ Yellow is drawn last when problem areas overlap. **Not every triangle is an erro
 
 **One-file installer:** The PNG shown in this repository is for preview and documentation. The shelf icon is already **embedded inside the Python installer**, so the PNG does **not** need to be downloaded separately.
 
-**Upgrading from V1 or earlier V2 builds:** The V2 installer does not forcibly unload plugins that Maya still has in use. It updates a matching existing TI button on the active shelf. Maya might retain an older already-loaded UI until restarted; if the wrong build continues to appear, restart Maya and click **TI v2** again. Existing V1 `.py` remains available in this repository.
+**Upgrading from previous V2 builds:** Download the new `TopologyInspector_DragDrop_V2.py` and drag it into Maya again with the target Shelf selected. This maintenance build uses a new **internal Maya command and runtime filename** so Maya does not accidentally relaunch a previously loaded V2 / V2.1 build. It updates the matching V2 Shelf button. The legacy V1 button is not replaced. The window title should read **Topology Inspector V2 | Updated 2026-10-11**.
+
+If the old window remains, close it. If the Shelf still shows the old icon after installation, restart Maya once to refresh Maya's image cache, then click the updated V2 button. If the tool appears with the old title, the old Shelf button may still exist in another Shelf tab; install V2 on that tab or remove its old button via Shelf Editor.
 
 ### Alternative launch (after installation)
 
@@ -55,10 +57,10 @@ Click the **TI v2** shelf button. Advanced users can also open Maya **Script Edi
 
 ```python
 import maya.cmds as cmds
-cmds.topologyInspectorV21UI()
+cmds.topologyInspectorV2B20261011UI()
 ```
 
-The `V21` suffix above is an **internal compatibility identifier**, not the public release number. Do not change internal Maya command / node IDs without updating the plugin migration logic.
+The long build-specific suffix above is an **internal cache/upgrade identifier**, not the public release number. Do not change internal Maya command / node IDs without updating the plugin migration logic.
 
 ## Usage
 
@@ -91,7 +93,7 @@ The `V21` suffix above is an **internal compatibility identifier**, not the publ
 
 ## Development notes
 
-The tool uses `maya.cmds`, `maya.api.OpenMaya`, `maya.api.OpenMayaUI`, and `maya.api.OpenMayaRender`. Public release filenames use **V1** and **V2**; internal plugin identifiers may differ to support upgrades alongside plugins Maya already has loaded. The shelf icon is packaged inside the Python file.
+The tool uses `maya.cmds`, `maya.api.OpenMaya`, `maya.api.OpenMayaUI`, and `maya.api.OpenMayaRender`. Public release filenames use **V1** and **V2**; internal plugin identifiers may differ to support upgrades alongside plugins Maya already has loaded. The 32px and 64px shelf icon images are embedded in the Python installer.
 
 ## License
 
