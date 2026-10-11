@@ -1,76 +1,98 @@
 # Topology Inspector for Maya
 
-A Python-based **topology inspection tool for Autodesk Maya** that highlights triangles, N-gons, and non-manifold problem areas directly in Viewport 2.0. Select matching components with one click and install the tool by dragging a single Python file into Maya.
+**Topology Inspector V2** is a Python-based, non-destructive topology inspection tool for **Autodesk Maya** and **Viewport 2.0**. It can scan multiple polygon objects at once and keep color-coded problem areas visible while you select and inspect other objects.
 
-**Status:** Initial public version (V1). The installer has passed Python syntax checks and scripted mock tests, but has **not yet been fully validated in a running copy of Maya**. Please report any errors along with your Maya version and the Script Editor traceback.
+![Topology Inspector V2 shelf icon](TI_ShelfIcon_V2.png)
 
-## Features
+**Latest:** [Download the V2 drag-and-drop installer](./TopologyInspector_DragDrop_V2.py) · **Previous:** [V1 installer](./TopologyInspector_DragDrop_V1.py)
 
-| Feature | Description |
-| --- | --- |
-| 🔴 N-gon visualization | Red translucent fill and thick red boundaries for polygons with **5 or more sides**. |
-| 🔵 Triangle visualization | Blue translucent fill and thick blue boundaries for **3-sided polygons**. |
-| Select all N-gons | Select every N-gon face on the active polygon mesh. |
-| Select all triangles | Select every triangle face on the active polygon mesh. |
-| Select both | Select triangle and N-gon faces together. |
-| 🟡 Find non-manifold + lamina | Detect non-manifold edges and vertices and lamina faces; highlight associated faces, edges, and vertices in yellow and select related components. |
-| Adjustable viewport display | Toggle overlays and adjust edge width and face opacity. |
-| Refresh | Reanalyze the selected mesh after topology edits. |
+> **Testing status:** V2 has passed Python syntax and offline installation/UI mock checks. Full in-Maya viewport and cross-version compatibility testing has not yet been completed. If you encounter an issue, please include your Maya version and the Script Editor traceback.
 
-**Note:** The yellow diagnostic mode looks for **non-manifold** topology (errors), not ordinary valid manifold geometry. The selection includes neighboring components to help locate problem regions.
+## What's new in V2
+
+- **Batch inspection:** Select multiple polygon objects or transform groups, then click **CHECK SELECTED OBJECTS**.
+- **Objects with Issues list:** Only objects containing N-gons, triangles, or detected non-manifold / lamina topology are listed, with per-object counts (`N / M / T`).
+- **Persistent viewport highlights:** Scanned objects keep their highlights when you change Maya's selection or click another result. They persist until hidden, rescanned, or the tool is closed.
+- **Per-object visibility:** Check or uncheck individual result rows, or use **CHECK ALL** / **UNCHECK ALL**.
+- **Color-coded Issue Types filters:** Red **N-GONS**, yellow **NON-MANIFOLD**, and blue **TRIANGLES** buttons toggle their own overlays; disabled buttons appear gray.
+- **Color-coded component selection:** Red **SELECT N-GONS**, blue **SELECT TRIANGLES**, purple **SELECT BOTH**, and yellow **SELECT NON-MANIFOLD** act on the last clicked result object.
+- **Recheck Listed:** Refresh stored geometry and counts after editing or moving the meshes.
+- **Current-shelf installer:** Drag-and-drop installation adds or updates the **TI v2** icon on your **currently selected shelf tab** (rather than automatically creating Custom).
+- **Non-destructive display:** Original mesh geometry, materials, UVs, vertex colors, and construction history are left unchanged.
+
+### Color legend
+
+| Issue | Viewport display | Detected topology |
+| --- | --- | --- |
+| N-gons | 🔴 Red translucent faces and thick outlines | Polygon with 5+ sides |
+| Triangles | 🔵 Blue translucent faces and thick outlines | Three-sided polygon |
+| Non-manifold / lamina | 🟡 Yellow related faces, bad edges and vertices | Non-manifold edges/vertices and lamina faces identified by Maya |
+
+Yellow is drawn last when problem areas overlap. **Not every triangle is an error:** triangles and N-gons are inspection categories, while non-manifold and lamina geometry are typically defects for a manifold mesh workflow.
 
 ## Requirements
 
-- Autodesk Maya with **Python 3** and **Viewport 2.0** (intended for Maya 2022+; individual releases are not yet verified).
-- A visible Maya Shelf area for automatic Shelf button installation.
-- No third-party Python packages required.
+- Autodesk Maya **2022 or later** (intended compatibility; not tested across all releases)
+- **Python 3** and **Viewport 2.0**
+- A visible Maya shelf for automatic installation
+- No external Python packages needed
 
-## Installation: drag and drop
+## Install V2 (drag and drop)
 
-1. Download [`TopologyInspector_DragDrop_V1.py`](./TopologyInspector_DragDrop_V1.py). On GitHub, open the file, click **Raw**, and save it with the `.py` extension, or download the repository ZIP and extract the file.
-2. Launch **Autodesk Maya**.
-3. Drag the `.py` file from File Explorer/Finder **into a Maya viewport** (the 3D view, not Script Editor). If Maya asks permission to execute the script, review and approve it.
-4. The installer should create or reuse the **Custom** Shelf, add a **TI** icon, and open the **Topology Inspector** window.
-5. Next time you launch Maya, open the tool from the **TI** button on the **Custom** Shelf.
+1. [Download `TopologyInspector_DragDrop_V2.py`](./TopologyInspector_DragDrop_V2.py). Use **Raw** on GitHub and save it with `.py`, or download the repository ZIP and extract it.
+2. Open Maya and select the **Shelf tab where you want the icon to appear**.
+3. Drag the `.py` file from your file manager into a **3D Viewport** (not into Script Editor). Review/allow Maya's security prompt if you trust the script.
+4. The installer copies its Python runtime into your Maya user scripts folder, writes the embedded **TI v2** icon to your Maya user bitmaps folder, adds or updates the button on the selected shelf, and opens the tool.
+5. In future sessions, click the **TI v2** shelf icon to open the inspector.
 
-The drag-and-drop file contains its own Shelf icon image. **No separate PNG is required to install it.** The installer copies the Python script into your Maya user scripts directory and places the icon in your user bitmaps directory; the Shelf button points to this installed copy.
+**One-file installer:** The PNG shown in this repository is for preview and documentation. The shelf icon is already **embedded inside the Python installer**, so the PNG does **not** need to be downloaded separately.
 
-### Using the inspector
+**Upgrading from V1 or earlier V2 builds:** The V2 installer does not forcibly unload plugins that Maya still has in use. It updates a matching existing TI button on the active shelf. Maya might retain an older already-loaded UI until restarted; if the wrong build continues to appear, restart Maya and click **TI v2** again. Existing V1 `.py` remains available in this repository.
 
-1. Select a polygon mesh in the viewport or Outliner. The tool scans the active mesh and shows counts for triangles, N-gons, non-manifold elements, and lamina faces.
-2. Look for **red** (N-gons) and **blue** (triangles) overlays in Viewport 2.0.
-3. Use **SELECT ALL N-GONS**, **SELECT ALL TRIANGLES**, or **SELECT BOTH** to select matching polygon faces.
-4. Press **FIND NON-MANIFOLD + LAMINA** to mark problem topology in **yellow** and select its associated components.
-5. After editing topology, click **REFRESH SELECTED MESH / CLEAR YELLOW** to rescan.
+### Alternative launch (after installation)
 
-The inspector uses a temporary viewport overlay rather than changing your existing shader or vertex colors. It creates a temporary Maya node for the overlay, which it removes before saving the scene and restores afterward.
+Click the **TI v2** shelf button. Advanced users can also open Maya **Script Editor > Python** and run:
 
-## Troubleshooting
+```python
+import maya.cmds as cmds
+cmds.topologyInspectorV21UI()
+```
 
-**Drop does not open the tool**
-- Make sure you drop the `.py` file into the **3D viewport**, not the Outliner, Shelf, or Script Editor.
-- Open **Windows > General Editors > Script Editor** and look for Python errors. Check whether execution of dropped scripts is blocked by Maya security settings.
+The `V21` suffix above is an **internal compatibility identifier**, not the public release number. Do not change internal Maya command / node IDs without updating the plugin migration logic.
 
-**The TI button does not appear**
-- Make sure the **Shelf** interface is visible and inspect the **Custom** tab.
-- If automatic Shelf saving fails, use the Shelf Editor to save the Shelf manually.
+## Usage
 
-**The viewport remains unchanged**
-- Select a **polygon mesh** and make sure its topology contains triangles or N-gons.
-- Ensure Viewport 2.0 is active and **Show viewport color overlay** is enabled, then press **Refresh**.
-- An all-quad mesh will normally have **no red or blue problem highlights**.
+1. Select all polygon objects or groups you want to inspect in Maya.
+2. Click **CHECK SELECTED OBJECTS**. The result list is replaced with objects containing one or more of the three categories; clean objects are not listed.
+3. Click an object's name in **OBJECTS WITH ISSUES** to focus it. Highlights on the other checked objects remain visible.
+4. Toggle an object's checkbox or use **CHECK ALL / UNCHECK ALL** to control per-object overlays.
+5. Click red, yellow, or blue **ISSUE TYPES** buttons to switch category visibility for all checked objects independently. An `[OFF]` filter turns gray without removing scan results.
+6. To inspect selected components, click a result row and use the matching colored **SELECT COMPONENTS** buttons.
+7. After editing or moving any inspected object, click **RECHECK LISTED** to refresh stored geometry and issue counts.
 
-**An earlier version is still loaded**
-- This V1 installer uses separate internal plugin identifiers so it does not need to forcibly unload older versions. It attempts to close old inspector windows and clean up their temporary overlays.
-- If Maya continues to show unexpected behavior, restart Maya and drop the latest file again. Include the Script Editor traceback when reporting an issue.
+## Limitations / troubleshooting
 
-## Technical notes
+- This tool is a **diagnostic overlay and selector**, not a mesh repair or automatic retopology tool.
+- Display positions and counts are a **snapshot** of the inspected objects. Press **RECHECK LISTED** after scene changes.
+- The issue list persists only while the inspector window is open. Closing the window clears the temporary overlay.
+- The overlay node is removed before scene saves and restored afterward; original geometry is not modified.
+- Standard open-border edges are not automatically considered non-manifold errors.
+- Instancing, heavily corrupted meshes, and individual viewport backends require additional testing.
+- If drag-and-drop does not work, ensure the file has `.py` extension and is dropped on a Maya viewport with scripting enabled. Check **Windows > General Editors > Script Editor** for Python errors.
+- If the icon is missing, make sure the Shelf is visible; the installer adds it to the **active** shelf tab. Save the shelf in Shelf Editor if automatic saving is unsuccessful.
+- If previously loaded plugins cause unexpected behavior, restart Maya and launch the latest shelf button.
 
-- Built with `maya.cmds`, Maya Python API 2.0 (`maya.api.OpenMaya`), and the Viewport 2.0 draw API (`maya.api.OpenMayaRender`).
-- The public release filename ends in **`_V1.py`**. Internal plugin identifiers intentionally retain their version-specific suffixes for compatibility with older loaded plugin versions; **do not rename those internal identifiers without reviewing migration behavior**.
-- The tool analyzes one active polygon mesh at a time, not every mesh in the scene.
-- The script does not repair topology; it highlights and selects components for inspection.
+## Available versions
+
+| Version | File | Scope |
+| --- | --- | --- |
+| **V2** (latest) | [`TopologyInspector_DragDrop_V2.py`](./TopologyInspector_DragDrop_V2.py) | Multi-object scan, retained list, color filters and selection tools, current shelf |
+| V1 (legacy) | [`TopologyInspector_DragDrop_V1.py`](./TopologyInspector_DragDrop_V1.py) | Single-object inspector, Custom Shelf installer |
+
+## Development notes
+
+The tool uses `maya.cmds`, `maya.api.OpenMaya`, `maya.api.OpenMayaUI`, and `maya.api.OpenMayaRender`. Public release filenames use **V1** and **V2**; internal plugin identifiers may differ to support upgrades alongside plugins Maya already has loaded. The shelf icon is packaged inside the Python file.
 
 ## License
 
-No license has been selected yet. Publishing the source on GitHub does not automatically grant redistribution or modification rights. The repository owner can add a license later.
+Please consult the repository's `LICENSE` file if one is present. Publication of code without a license does not by itself grant permission to modify or redistribute it.
